@@ -71,5 +71,6 @@ public class RobotMap {
 	public static final Constant<Double> FOLLOW_kA = new Constant<>("follow_kA", 0.1);
 	public static final Constant<Double> FOLLOW_kH = new Constant<>("follow_kH", 0.0);
 	public static final Constant<Double> FOLLOW_kHP = new Constant<>("follow_kHP", 0.0);
+	public static final Constant<Double> FOLLOW_kHD = new Constant<>("follow_kHD", 0.0);
 
 }

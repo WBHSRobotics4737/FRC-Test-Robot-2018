@@ -113,8 +113,8 @@ public class Drive extends Subsystem {
 
 		position = new DriveDeadReckoner(lEnc, rEnc, navX, 0.005);
 
-		follower = new TrajectoryFollower(position, rawDrive, FOLLOW_kP.val(), FOLLOW_kI.val(), FOLLOW_kD.val(),
-				FOLLOW_kV.val(), FOLLOW_kA.val(), FOLLOW_kH.val(), FOLLOW_kHP.val());
+		follower = new TrajectoryFollower(position, lfTalon, rfTalon, FOLLOW_kP.val(), FOLLOW_kI.val(), FOLLOW_kD.val(),
+				FOLLOW_kV.val(), FOLLOW_kA.val(), FOLLOW_kH.val(), FOLLOW_kHP.val(), FOLLOW_kHD.val());
 	}
 
 	private WPI_TalonSRX createDriveTalon(int id) {

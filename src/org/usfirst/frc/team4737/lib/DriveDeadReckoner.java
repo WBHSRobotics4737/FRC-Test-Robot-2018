@@ -44,7 +44,7 @@ public class DriveDeadReckoner {
 	private Encoder rEnc;
 	private AHRS navX;
 
-	private Timer updateLoop;
+	Timer updateLoop;
 
 	private double lastLDist;
 	private double lastRDist;
@@ -53,9 +53,9 @@ public class DriveDeadReckoner {
 	// TODO include buffer of past several seconds of data with timestamps
 	// Add function to get position at prev time to allow delayed correction using
 	// cameras
-	private double x;
-	private double y;
-	private double heading;
+	 double x;
+	 double y;
+	 double heading;
 
 	// Test debug
 	private double ldsx;
@@ -73,7 +73,7 @@ public class DriveDeadReckoner {
 	private void update(double dt) {
 		double newLDist = lEnc.getDistance();
 		double newRDist = rEnc.getDistance();
-		heading = navX.getAngle() / (Math.PI * 2.0);
+		heading = navX.getAngle() * (Math.PI / 180.0);
 
 		double dl = newLDist - lastLDist;
 		double dr = newRDist - lastRDist;
@@ -88,14 +88,14 @@ public class DriveDeadReckoner {
 		lastHeading = heading;
 	}
 
-	private void calculate(double dt, double dl, double dr, double da, double heading, double offset) {
+	void calculate(double dt, double dl, double dr, double da, double heading, double offset) {
 		double ldsx;
 		double ldsy;
 		// TODO find out a good value for this
 		// We want to maintain accuracy while avoiding precision loss due to high values
 		// of r
 		// This might not actually be an issue
-		if (Math.abs(da) < 0.00001) {
+		if (Math.abs(da) < 0.00000001) {
 			ldsx = 0;
 			ldsy = (dl + dr) / 2.0;
 		} else {
