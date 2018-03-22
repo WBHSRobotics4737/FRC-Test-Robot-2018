@@ -14,7 +14,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 public class LazyWPITalonSRX extends WPI_TalonSRX {
 
 	protected double lastSet = Double.NaN;
-	protected ControlMode lastControlMode = null;
+	protected ControlMode lastControlMode = ControlMode.Disabled;
 
 	public LazyWPITalonSRX(int deviceNumber) {
 		super(deviceNumber);
@@ -22,15 +22,15 @@ public class LazyWPITalonSRX extends WPI_TalonSRX {
 
 	@Override
 	public void set(double speed) {
-		set(lastControlMode, speed);
+		set(ControlMode.PercentOutput, speed);
 	}
 
 	@Override
 	public void set(ControlMode mode, double value) {
 		if (value != lastSet || getControlMode() != lastControlMode) {
+			super.set(mode, value);
 			lastSet = value;
 			lastControlMode = getControlMode();
-			super.set(mode, value);
 		}
 	}
 

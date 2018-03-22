@@ -10,14 +10,6 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class TeleopDrive extends Command {
 
-	public static final Trigger TRIGGER = new Trigger() {
-		@Override
-		public boolean get() {
-			return Robot.OI.driver.getAxis("LT").get() != 0 || Robot.OI.driver.getAxis("LT").get() != 0
-					|| Robot.OI.driver.getAxis("LS_X").get() != 0;
-		}
-	};
-
 	public TeleopDrive() {
 		requires(Robot.DRIVE);
 	}
@@ -34,8 +26,8 @@ public class TeleopDrive extends Command {
 		boolean quickTurn = Robot.OI.driver.getButton("LB").get();
 		
 		if (slowDrive) {
-			throttle *= 0.6;
-			rotation *= 0.6;
+			throttle *= 0.3;
+			rotation *= 0.3;
 		}
 		
 		Robot.DRIVE.curvatureDrive(throttle, rotation, quickTurn);

@@ -4,6 +4,7 @@ import org.usfirst.frc.team4737.lib.DriveDeadReckoner;
 import org.usfirst.frc.team4737.lib.JerkLimitedTalonSRXController;
 import org.usfirst.frc.team4737.lib.LazyWPITalonSRX;
 import org.usfirst.frc.team4737.lib.TrajectoryFollower;
+import org.usfirst.frc.team4737.robot.RobotMap;
 import org.usfirst.frc.team4737.robot.commands.TeleopDrive;
 
 import com.ctre.phoenix.motorcontrol.IMotorController;
@@ -11,12 +12,17 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
+import jaci.pathfinder.Waypoint;
+import jaci.pathfinder.Trajectory.FitMethod;
 
 import static org.usfirst.frc.team4737.robot.RobotMap.*;
 
@@ -24,6 +30,9 @@ import static org.usfirst.frc.team4737.robot.RobotMap.*;
  *
  */
 public class Drive extends Subsystem {
+
+	public final Trajectory.Config DEFAULT_TRAJ_CONFIG = new Trajectory.Config(FitMethod.HERMITE_CUBIC,
+			Trajectory.Config.SAMPLES_FAST, 0.01, RobotMap.DRIVE_MAX_SPEED, 10, 60);
 
 	// Talons and sensors
 
@@ -50,11 +59,11 @@ public class Drive extends Subsystem {
 	private DifferentialDrive smoothDrive;
 	private DifferentialDrive rawDrive;
 
-	private TrajectoryFollower follower;
+	public TrajectoryFollower follower;
 
 	// Other
 
-	private DriveDeadReckoner position;
+	public DriveDeadReckoner position;
 
 	public Drive() {
 		// Initialize talons
@@ -64,7 +73,7 @@ public class Drive extends Subsystem {
 		rrTalon = createSlaveTalon(TALON_RR_DRIVE, rfTalon);
 		talons = new WPI_TalonSRX[] { lfTalon, lrTalon, rfTalon, rrTalon };
 
-		rfTalon.setInverted(true);
+		//		rfTalon.setInverted(true);
 		// rrTalon.setInverted(true); // Shouldn't need to invert slave talon
 
 		// Initialize sensors
@@ -109,7 +118,11 @@ public class Drive extends Subsystem {
 						DRIVE_MAX_ACCEL_PCT.val(), DRIVE_MAX_JERK_PCT.val()),
 				rSmoothDrive = new JerkLimitedTalonSRXController(rfTalon, DRIVE_MAX_SPEED_PCT.val(),
 						DRIVE_MAX_ACCEL_PCT.val(), DRIVE_MAX_JERK_PCT.val()));
+		lSmoothDrive.disable();
+		rSmoothDrive.disable();
+		smoothDrive.setSafetyEnabled(false);
 		rawDrive = new DifferentialDrive(lfTalon, rfTalon);
+		rawDrive.setSafetyEnabled(false);
 
 		position = new DriveDeadReckoner(lEnc, rEnc, navX, 0.005);
 
@@ -122,7 +135,7 @@ public class Drive extends Subsystem {
 		talon.configVoltageCompSaturation(12, 100);
 		talon.enableVoltageCompensation(true);
 		talon.setNeutralMode(NeutralMode.Brake);
-		talon.setSafetyEnabled(true);
+		talon.setSafetyEnabled(false);
 		return talon;
 	}
 
@@ -136,12 +149,27 @@ public class Drive extends Subsystem {
 		setDefaultCommand(new TeleopDrive());
 	}
 
+	double lastPrintTime = 0;
+
 	@Override
 	public void periodic() {
 
-		SmartDashboard.putNumber("speed", (lEnc.getRate() + rEnc.getRate()) / 2.0);
-		SmartDashboard.putNumber("omega", navX.getRate());
+		if (Timer.getFPGATimestamp() - lastPrintTime >= 0.2) {
+			//		SmartDashboard.putNumber("speed", (lEnc.getRate() + rEnc.getRate()) / 2.0);
+			//		SmartDashboard.putNumber("omega", navX.getRate());
+			SmartDashboard.putNumber("gx", position.getX());
+			SmartDashboard.putNumber("gy", position.getY());
+			SmartDashboard.putNumber("dir", position.getHeading());
+			lastPrintTime = Timer.getFPGATimestamp();
+		}
 
+	}
+
+	public void setTrajectory(Waypoint[] points, Trajectory.Config config, double maxSpeed) {
+		config.max_velocity = maxSpeed;
+		DriverStation.reportWarning("Generating trajectory...", false);
+		setTrajectory(Pathfinder.generate(points, config));
+		DriverStation.reportWarning("Finished.", false);
 	}
 
 	public void setTrajectory(Trajectory traj) {

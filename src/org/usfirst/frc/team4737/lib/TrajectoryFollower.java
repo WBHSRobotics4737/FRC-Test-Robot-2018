@@ -116,7 +116,7 @@ public class TrajectoryFollower {
 
 			DoubleMatrix vSeg = new DoubleMatrix(new double[] { Math.cos(seg.heading), Math.sin(seg.heading) });
 			DoubleMatrix vEps = new DoubleMatrix(
-					new double[] { seg.x - position.getGlobalX(), seg.y - position.getGlobalY() });
+					new double[] { seg.x - position.getX(), seg.y - position.getY() });
 
 			DoubleMatrix vEpsP = vSeg.mul(vEps.dot(vSeg));
 			DoubleMatrix vEpsR = vEps.sub(vEpsP);
@@ -148,8 +148,9 @@ public class TrajectoryFollower {
 	}
 
 	private void arcadeDrive(double throttle, double steer) {
-		throttle = Math.max(Math.min(throttle, 1), -1);
-		steer = Math.max(Math.min(steer, 1), -1);
+		double max = 0.5;
+		throttle = Math.max(Math.min(throttle, max), -max);
+		steer = Math.max(Math.min(steer, max), -max);
 
 		double leftMotorOutput;
 		double rightMotorOutput;
@@ -176,8 +177,8 @@ public class TrajectoryFollower {
 			}
 		}
 
-		left.set(Math.max(Math.min(leftMotorOutput, 1), -1));
-		right.set(Math.max(Math.min(rightMotorOutput, 1), -1));
+		left.set(Math.max(Math.min(leftMotorOutput, max), -max));
+		right.set(Math.max(Math.min(rightMotorOutput, max), -max));
 	}
 
 	public void followTrajectory(Trajectory traj) {

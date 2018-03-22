@@ -38,15 +38,17 @@ public class RobotMap {
 	// Physical Constants ###############################
 
 	public static final double WHEEL_DIAM_FEET = (6.0 / 12.0);
-	public static final double WHEELBASE_WIDTH = -1; // TODO measure this
+	public static final double WHEELBASE_WIDTH = 24.25 / 12.0;
+	
+	public static final double DRIVE_MAX_SPEED = 10; // TODO find more accurate value?
 
 	public static final double ENC_FEET_PER_PULSE = Math.PI * WHEEL_DIAM_FEET / ENC_PULSES_PER_REV;
 
 	// Control Constants ################################
 
 	public static final Constant<Double> DRIVE_MAX_SPEED_PCT = new Constant<>("driveMaxS", 1.0);
-	public static final Constant<Double> DRIVE_MAX_ACCEL_PCT = new Constant<>("driveMaxA", 10.0);
-	public static final Constant<Double> DRIVE_MAX_JERK_PCT = new Constant<>("driveMaxJ", 50.0);
+	public static final Constant<Double> DRIVE_MAX_ACCEL_PCT = new Constant<>("driveMaxA", 8.0);
+	public static final Constant<Double> DRIVE_MAX_JERK_PCT = new Constant<>("driveMaxJ", 30.0);
 
 //	public static final Constant<Double> ENC_LPOS_P = new Constant<>("encLPosP", 0.0);
 //	public static final Constant<Double> ENC_LPOS_I = new Constant<>("encLPosI", 0.0);
@@ -68,9 +70,9 @@ public class RobotMap {
 	public static final Constant<Double> FOLLOW_kI = new Constant<>("follow_kI", 0.0);
 	public static final Constant<Double> FOLLOW_kD = new Constant<>("follow_kD", 0.0);
 	public static final Constant<Double> FOLLOW_kV = new Constant<>("follow_kV", 1.0 / 10.5); // 10.5 ft/s
-	public static final Constant<Double> FOLLOW_kA = new Constant<>("follow_kA", 0.1);
-	public static final Constant<Double> FOLLOW_kH = new Constant<>("follow_kH", 0.0);
-	public static final Constant<Double> FOLLOW_kHP = new Constant<>("follow_kHP", 0.0);
-	public static final Constant<Double> FOLLOW_kHD = new Constant<>("follow_kHD", 0.0);
+	public static final Constant<Double> FOLLOW_kA = new Constant<>("follow_kA", 0.0);
+	public static final Constant<Double> FOLLOW_kH = new Constant<>("follow_kH", 1.0 / (DRIVE_MAX_SPEED / WHEELBASE_WIDTH));
+	public static final Constant<Double> FOLLOW_kHP = new Constant<>("follow_kHP", 0.66);
+	public static final Constant<Double> FOLLOW_kHD = new Constant<>("follow_kHD", 0.5);
 
 }

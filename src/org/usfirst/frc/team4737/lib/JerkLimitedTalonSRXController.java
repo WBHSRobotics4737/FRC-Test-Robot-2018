@@ -143,6 +143,7 @@ public class JerkLimitedTalonSRXController implements SpeedController {
 
 	public void pauseUpdates() {
 		currentTask.cancel();
+		active = false;
 	}
 
 	@Override

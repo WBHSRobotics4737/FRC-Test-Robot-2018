@@ -48,7 +48,7 @@ public class DriveDeadReckoner {
 
 	private double lastLDist;
 	private double lastRDist;
-	private double lastHeading;
+	private double lastActualHeading;
 
 	// TODO include buffer of past several seconds of data with timestamps
 	// Add function to get position at prev time to allow delayed correction using
@@ -73,19 +73,21 @@ public class DriveDeadReckoner {
 	private void update(double dt) {
 		double newLDist = lEnc.getDistance();
 		double newRDist = rEnc.getDistance();
-		heading = navX.getAngle() * (Math.PI / 180.0);
+		double actualHeading = -navX.getAngle() * (Math.PI / 180.0);
 
 		double dl = newLDist - lastLDist;
 		double dr = newRDist - lastRDist;
-		double da = heading - lastHeading; // Arc angle of circular path
+		double da = actualHeading - lastActualHeading; // Arc angle of circular path
 
+		heading += da;
+		
 		double offset = 0; // TODO determine center of rotation offset based on navX pitch
 
 		calculate(dt, dl, dr, da, heading, offset);
 
 		lastLDist = newLDist;
 		lastRDist = newRDist;
-		lastHeading = heading;
+		lastActualHeading = actualHeading;
 	}
 
 	void calculate(double dt, double dl, double dr, double da, double heading, double offset) {
@@ -96,15 +98,15 @@ public class DriveDeadReckoner {
 		// of r
 		// This might not actually be an issue
 		if (Math.abs(da) < 0.00000001) {
-			ldsx = 0;
-			ldsy = (dl + dr) / 2.0;
+			ldsx = (dl + dr) / 2.0;
+			ldsy = 0;
 		} else {
 			double s = (dl + dr) / 2.0; // Arc length of circular path
 
-			double r = s / da; // Radius of circular path
+			double r = s / Math.abs(da); // Radius of circular path
 
-			ldsx = r * Math.sin(da - Math.PI / 2.0) + r;
-			ldsy = r * Math.cos(da - Math.PI / 2.0);
+			ldsx = r * Math.cos(-da) - r;
+			ldsy = r * Math.sin(-da);
 		}
 		this.ldsx = ldsx;
 		this.ldsy = ldsy;
@@ -122,12 +124,22 @@ public class DriveDeadReckoner {
 		y += dS.get(1, 0);
 	}
 
-	public double getGlobalX() {
+	public double getX() {
 		return x;
 	}
 
-	public double getGlobalY() {
+	public double getY() {
 		return y;
+	}
+	
+	public double getHeading() {
+		return heading;
+	}
+	
+	public void resetPos() {
+		x = 0;
+		y = 0;
+		heading = 0;
 	}
 
 	public static void main(String[] args) {
