@@ -97,16 +97,20 @@ public class DriveDeadReckoner {
 		// We want to maintain accuracy while avoiding precision loss due to high values
 		// of r
 		// This might not actually be an issue
-		if (Math.abs(da) < 0.00000001) {
+		if (Math.abs(da) < 0) {
 			ldsx = (dl + dr) / 2.0;
 			ldsy = 0;
 		} else {
 			double s = (dl + dr) / 2.0; // Arc length of circular path
+			double a = da / dt;
 
-			double r = s / Math.abs(da); // Radius of circular path
-
-			ldsx = r * Math.cos(-da) - r;
-			ldsy = r * Math.sin(-da);
+//			double r = s / Math.abs(da); // Radius of circular path
+//
+//			ldsx = r * Math.cos(da);
+//			ldsy = r * Math.sin(da);
+			
+			ldsx = s * Math.cos(da);
+			ldsy = s * Math.sin(da);
 		}
 		this.ldsx = ldsx;
 		this.ldsy = ldsy;
@@ -116,8 +120,8 @@ public class DriveDeadReckoner {
 
 		// Convert local displacement to global displacement
 		DoubleMatrix trans = new DoubleMatrix(new double[][] { { 1, 0, 0 }, { 0, 1, -offset }, { 0, 0, 1 } });
-		DoubleMatrix rot = new DoubleMatrix(new double[][] { { Math.cos(heading), Math.sin(heading), 0 },
-				{ -Math.sin(heading), Math.cos(heading), 0 }, { 0, 0, 1 } });
+		DoubleMatrix rot = new DoubleMatrix(new double[][] { { Math.cos(heading), -Math.sin(heading), 0 },
+				{ Math.sin(heading), Math.cos(heading), 0 }, { 0, 0, 1 } });
 		DoubleMatrix dS = trans.mmul(rot.mmul(local_dS));
 
 		x += dS.get(0, 0);
@@ -148,7 +152,7 @@ public class DriveDeadReckoner {
 			FileWriter writer = new FileWriter("testfiles/reckoner.csv");
 
 			writer.write("time,x,y,heading,ldsx,ldsy\n");
-			double period = 0.05;
+			double period = 0.01;
 
 			DriveDeadReckoner ddr = new DriveDeadReckoner(null, null, null, period);
 			ddr.updateLoop.cancel();
@@ -158,8 +162,8 @@ public class DriveDeadReckoner {
 			double heading = 0;
 			for (nextT += 2; t < nextT; t += period) {
 				double dl = 1.0 * period;
-				double dr = 1.0 * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double dr = 1.0 * period; 
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 
@@ -168,7 +172,7 @@ public class DriveDeadReckoner {
 			for (nextT += 2; t < nextT; t += period) {
 				double dl = 1.0 * period;
 				double dr = 2.0 * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 
@@ -177,7 +181,7 @@ public class DriveDeadReckoner {
 			for (nextT += 2; t < nextT; t += period) {
 				double dl = 3.0 * period;
 				double dr = 2.0 * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 
@@ -186,7 +190,7 @@ public class DriveDeadReckoner {
 			for (nextT += 28.0 / 12.0 * Math.PI * 2.0 / 3 * 5 / 8; t < nextT; t += period) {
 				double dl = 0.0 * period;
 				double dr = 3.0 * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 
@@ -195,7 +199,7 @@ public class DriveDeadReckoner {
 			for (nextT += 2; t < nextT; t += period) {
 				double dl = (1.0 + (t - nextT + 2) * 3) * period;
 				double dr = 1.0 * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 
@@ -204,7 +208,7 @@ public class DriveDeadReckoner {
 			for (nextT += 4; t < nextT; t += period) {
 				double dl = -2.0 * period;
 				double dr = Math.sin(t * Math.PI) * period;
-				double da = (dl - dr) / (28.0 / 12.0);
+				double da = (dr - dl) / (28.0 / 12.0);
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 

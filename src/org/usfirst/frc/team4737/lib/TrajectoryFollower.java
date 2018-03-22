@@ -148,7 +148,7 @@ public class TrajectoryFollower {
 	}
 
 	private void arcadeDrive(double throttle, double steer) {
-		double max = 0.5;
+		double max = 1;
 		throttle = Math.max(Math.min(throttle, max), -max);
 		steer = Math.max(Math.min(steer, max), -max);
 
@@ -212,7 +212,7 @@ public class TrajectoryFollower {
 		try {
 			FileWriter writer = new FileWriter("testfiles/trajfollow.csv");
 
-			double period = 0.01;
+			double period = 0.001;
 
 			double wheelbase = 28.0 / 12.0;
 			double maxSpeed = 9.0;
@@ -223,12 +223,12 @@ public class TrajectoryFollower {
 			SpeedController driveL;
 			SpeedController driveR;
 
-			double kP = 0.5;
+			double kP = 0.8;
 			double kV = 1.0 / maxSpeed;
 			double kA = 0.0;
 			double kH = 1.0 / (maxSpeed / (wheelbase));
-			double kHP = .66;
-			double kHD = .5;
+			double kHP = 0.66;
+			double kHD = 0.5;
 			TrajectoryFollower tf = new TrajectoryFollower(ddr, driveL = new SpeedController() {
 				public void pidWrite(double output) {
 				}
@@ -281,13 +281,14 @@ public class TrajectoryFollower {
 
 				public void disable() {
 				}
-			}, kP, 0, 0, kV, kA, kH, kHP, kHD);
+			},
+					kP, 0, 0, kV, kA, kH, kHP, kHD);
 
 			Waypoint[] points = new Waypoint[] { new Waypoint(0, 0, Pathfinder.d2r(0)),
 					new Waypoint(5, 2, Pathfinder.d2r(45)), new Waypoint(5, 5, Pathfinder.d2r(60)),
 					new Waypoint(13, 5, Pathfinder.d2r(0)) };
 
-			Trajectory.Config config = new Trajectory.Config(FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH,
+			Trajectory.Config config = new Trajectory.Config(FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST,
 					period, maxSpeed * 0.5, 10, 60);
 
 			Trajectory traj = Pathfinder.generate(points, config);
@@ -297,13 +298,13 @@ public class TrajectoryFollower {
 
 			writer.write("time,x,y,dataset,ffH,ff,leadE,sideE\n");
 
-			double heading = Math.PI / 2;
+			double heading = 0;
 			for (double t = 0; t < traj.length() * period; t += period) {
 				tf.update();
 
 				double dl = driveL.get() * maxSpeed * period;
 				double dr = driveR.get() * maxSpeed * period;
-				double da = (dl - dr) / wheelbase;
+				double da = (dr - dl) / wheelbase;
 				heading += da;
 				ddr.calculate(period, dl, dr, da, heading, 0);
 

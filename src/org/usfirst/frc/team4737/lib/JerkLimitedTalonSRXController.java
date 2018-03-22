@@ -194,7 +194,7 @@ public class JerkLimitedTalonSRXController implements SpeedController {
 
 			writer.write("time,speed,targetSpeed,maxSpeed,accel,maxAccel,jerk,maxJerk\n");
 
-			JerkLimitedTalonSRXController test = new JerkLimitedTalonSRXController(null, 1, 15, 100);
+			JerkLimitedTalonSRXController test = new JerkLimitedTalonSRXController(null, 1, 15, 80);
 			test.controlLoop.cancel();
 
 			double t = 0;
